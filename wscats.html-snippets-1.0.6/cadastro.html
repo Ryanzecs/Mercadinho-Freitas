@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>Cadastro de Usuário</title>
+  <style>
+    body {
+      font-family: 'Poppins', sans-serif;
+      background: #0a2753;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+
+    .cadastro-container {
+      background: white;
+      padding: 30px;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.2);
+      width: 350px;
+      text-align: center;
+    }
+
+    h2 {
+      color: #000000;
+    }
+
+    input {
+      width: 90%;
+      padding: 10px;
+      margin: 10px 0;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      font-size: 14px;
+    }
+
+    button {
+      width: 100%;
+      padding: 10px;
+      background-color: #007bff;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 15px;
+    }
+
+    button:hover {
+      background-color: #0a2753;
+    }
+
+    .mensagem {
+      margin-top: 15px;
+      font-weight: bold;
+    }
+
+    .voltar {
+      margin-top: 15px;
+    }
+
+    .voltar a {
+      color: #007bff;
+      text-decoration: none;
+    }
+
+    .voltar a:hover {
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="cadastro-container">
+    <h2>Cadastre-se</h2>
+    <input type="text" id="nome" placeholder="Nome completo">
+    <input type="email" id="email" placeholder="E-mail">
+    <input type="password" id="senha" placeholder="Senha">
+    <button onclick="cadastrar()">Cadastrar</button>
+    <p id="mensagem" class="mensagem"></p>
+
+    <div class="voltar">
+      <a href="login.html">🔙 Voltar para o login</a>
+    </div>
+  </div>
+
+  <script>
+    function cadastrar() {
+      const nome = document.getElementById('nome').value.trim();
+      const email = document.getElementById('email').value.trim();
+      const senha = document.getElementById('senha').value.trim();
+      const mensagem = document.getElementById('mensagem');
+
+      if (nome === '' || email === '' || senha === '') {
+        mensagem.style.color = 'red';
+        mensagem.textContent = 'Preencha todos os campos!';
+        return;
+      }
+
+      const usuario = {
+        nome: nome,
+        email: email,
+        senha: senha
+      };
+
+      localStorage.setItem('usuarioCadastrado', JSON.stringify(usuario));
+
+      mensagem.style.color = 'green';
+      mensagem.textContent = 'Cadastro realizado com sucesso! ✅';
+
+      setTimeout(() => {
+      window.location.href ='login.html';
+      }, 1500);
+    }
+  </script>
+
+</body>
+</html>
+
