@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <title>Cardápio de Mercado</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <style>
+    body { font-family: Arial, sans-serif;
+    background-image: url(../img/img.logofreitas.jpg.png);
+    background-repeat: no-repeat;
+    background-size: cover;
+    background-position: center center;
+    
+    margin: 0; padding: 0; }
+
+    header { background-color: #0a2753; color: rgb(102, 102, 102); padding: 15px; text-align: center; }
+    .usuario { font-size: 18px; margin-top: 5px; color: #cfe2ff; }
+    main { max-width: 900px; margin: 20px auto; padding: 15px; background: rgb(158, 158, 158); border-radius: 8px; box-shadow: 0 2px 6px rgba(0,0,0,0.1); }
+    h2 { text-align: center; color: #0a2753; }
+    .produtos { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 15px; margin-top: 20px; }
+    .produto { background: #f8f9fb; border: 1px solid #ddd; border-radius: 8px; padding: 10px; text-align: center; transition: transform 0.2s; display:flex;flex-direction:column; }
+    .produto:hover { transform: scale(1.03); }
+    .produto img { width: 100%; height: 130px; object-fit: cover; border-radius: 6px; margin-bottom:8px; }
+    .produto h3 { margin: 8px 0 4px 0; font-size: 16px; color: #333; }
+    .produto p { color: #666; margin: 4px 0; flex:0; }
+    .produto .actions { margin-top:auto; }
+    button { background-color: #007bff; color: white; border: none; border-radius: 6px; padding: 8px 12px; cursor: pointer; font-size: 14px; margin-top: 8px; }
+    button:hover { background-color: #0a2753; }
+    .carrinho { margin-top: 25px; border-top: 2px solid #eee; padding-top: 15px; }
+    .carrinho h3 { color: #0a2753; }
+    ul { list-style: none; padding: 0; }
+    li { margin: 6px 0; display: flex; justify-content: space-between; align-items: center; background: #f2f5f9; padding: 6px 10px; border-radius: 5px; }
+    .total { margin-top: 10px; font-weight: bold; color: #0a2753; text-align: right; }
+    .sair { margin-top: 20px; text-align: center; }
+    .sair a { color: #007bff; text-decoration: none; }
+    .sair a:hover { text-decoration: underline; }
+    @media (max-width:480px){ .produto img{height:110px} }
+  </style>
+</head>
+<body>
+
+  <header>
+    <h1>🛒 Lista de Produtos</h1>
+    <p class="usuario" id="saudacao">Carregando...</p>
+  </header>
+
+  <main>
+    <h2>Produtos disponíveis:</h2>
+
+    <div class="produtos" id="lista-produtos"></div>
+
+    <div class="carrinho">
+      <h3>🧺 Seu Carrinho</h3>
+      <ul id="itens-carrinho"></ul>
+      <p class="total" id="total">Total: R$ 0,00</p>
+    </div>
+
+    <div class="pagamento">
+      <button onclick="finalizarCompra()">Finalizar Compra</button>
+    </div>
+
+    <div class="sair">
+      <a href="login.html" id="link-sair">Sair da conta</a>
+    </div>
+  </main>
+
+  <script>
+    // --- pegar usuário logado (tenta usuarioLogado, senão usuarioCadastrado)
+    const usuarioLogado = JSON.parse(localStorage.getItem("usuarioLogado"));
+    const usuarioCadastrado = JSON.parse(localStorage.getItem("usuarioCadastrado"));
+    const usuario = usuarioLogado || usuarioCadastrado || null;
+    const saudacaoEl = document.getElementById("saudacao");
+
+    if (usuario && usuario.nome) {
+      saudacaoEl.textContent = `Olá, ${usuario.nome}! Seja bem-vindo(a) ao Mercadinho Freitas!`;
+    } else {
+      saudacaoEl.textContent = "Bem-vindo(a)! Faça login para ver mais opções.";
+    }
+
+    // lista de produtos (com imagem)
+    const produtos = [
+      { nome: "Bandeija de Ovos Brancos 30 UND", preco: 13.99, imagem : "https://www.distribuidoracaue.com.br/media/catalog/product/cache/a65d2b67834c4584ec9c01d883900305/o/v/ovo_branco_30_unidades.jpg" },
+      { nome: "Arroz Caçarola 1Kg", preco: 2.99, imagem : "https://wilso.agilecdn.com.br/17.jpg" },
+      { nome: "Feijão Carioca 1kg", preco: 5.99, imagem : "https://png.pngtree.com/png-vector/20240129/ourmid/pngtree-wooden-spoon-carioca-beans-png-image_11513023.png" },
+      { nome: "Café Oro Verde 250g", preco: 12.99, imagem : "https://cafeouroverde.com.br/wp-content/uploads/2019/06/OuroVerde_produto05.png" },
+      { nome: "Café Marata 250g", preco: 16.99, imagem : "https://mercantilnovaera.vtexassets.com/arquivos/ids/202764/Cafe-Almofada-Torrado-e-Moido-MARATA-Tradicional-Pacote-250g.jpg?v=638035157303000000" },
+      { nome: "Açúcar Cristal 1kg", preco: 4.29, imagem : "https://pedidook.s3-sa-east-1.amazonaws.com/10188/produto/foto_31230345.png?nocache=20231003104458540941" },
+      { nome: "Leite Camponesa Integral 200g", preco: 5.99, imagem : "https://camponesa.com.br/wp-content/uploads/2024/12/LC13-Leite-em-Po-Integral-200g-LP-ITG-e-MN-1.webp" },
+      { nome: "Leite Camponesa Instantâneo 200g", preco: 5.99, imagem : "https://camponesa.com.br/wp-content/uploads/2024/12/LeiteEmPoInstantaneo400g-EAN7896259410775.webp" },
+      { nome: "Óleo de Soja 900ml", preco: 9.99, imagem : "https://d21wiczbqxib04.cloudfront.net/peRiV01SBLxRA-mcaAxx0ZZ_cBs=/1600x0/smart/https://osuper-ecommerce-viladasfrutas2.s3.sa-east-1.amazonaws.com/3f1cec37-789603609024417120072srgb.png" },
+      { nome: "Refrigerante Jatobar 2L", preco: 4.99, imagem : "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTDNXeT8W84JghD1EVVF3YCqp_7N0R_T_Kg5jin3YwvIYOIrq1ATeZXSrR5VhhuSHRaiBY&usqp=CAU" },
+      { nome: "Refrigerante Coca-Cola 2L", preco: 10.49, imagem : "https://nossadistribuidorabebidas.com.br/wp-content/uploads/2024/10/Nossa-Distribuidora-Coca-Cola-2L.webp" },
+      { nome: "Macarrão Espaguete Bon Sabor 500g", preco: 2.99, imagem : "https://phygital-files.mercafacil.com/supermercadolevemais/uploads/produto/massa_espag_bonsabor_400g_d4ed43f4-526e-4eaa-a0a6-1133c5585233.jpg" },
+      { nome: "Papel Higiênico Familiar 12un", preco: 13.99, imagem : "https://d1zvfmhlebc91g.cloudfront.net/n49shopv2_papelecia/images/products/686fc7d722e53/001_10-686fc7d722f4b.png" },
+      { nome: "Desodorante Dove 250ml", preco: 16.99, imagem : "https://alexfarma.vteximg.com.br/arquivos/ids/172780-800-800/DES-AERO-DOVE-ORIGINAL-250ML.jpg?v=638634153920500000" },
+      { nome: "Sabão em Pó OMO 400g", preco: 6.99, imagem : "https://distcoimbra.vtexassets.com/arquivos/ids/207338/sabao-em-po-omo-lavagem-perfeita-caixa-400g-67791061-64853133-2.jpg?v=638838827027900000" } 
+    ]
+
+    const listaEl = document.getElementById("lista-produtos");
+    const carrinhoEl = document.getElementById("itens-carrinho");
+    const totalEl = document.getElementById("total");
+    let itensCarrinho = JSON.parse(localStorage.getItem("carrinho")) || [];
+
+    function moneyBRL(v){ return v.toLocaleString('pt-BR',{style:'currency',currency:'BRL'}); }
+
+    function atualizarCarrinho(){
+      carrinhoEl.innerHTML = "";
+      let soma = 0;
+
+      itensCarrinho.forEach((it, idx) => {
+        const li = document.createElement("li");
+        const nomeSpan = document.createElement("span");
+        nomeSpan.textContent = `${it.nome} - ${moneyBRL(it.preco)}`;
+
+        const btn = document.createElement("button");
+        btn.textContent = "Remover";
+        btn.addEventListener("click", ()=> {
+          itensCarrinho.splice(idx,1);
+          salvarECarregarCarrinho();
+        });
+
+        li.appendChild(nomeSpan);
+        li.appendChild(btn);
+        carrinhoEl.appendChild(li);
+
+        soma += Number(it.preco) || 0;
+      });
+
+      totalEl.textContent = "Total: " + moneyBRL(soma);
+      localStorage.setItem("carrinho", JSON.stringify(itensCarrinho));
+    }
+
+    function adicionarAoCarrinho(prod){
+      // opcional: checar se usuário está logado antes de adicionar
+      if(!usuario){
+        alert('Faça login para adicionar itens ao carrinho.');
+        window.location.href = 'login.html';
+        return;
+      }
+      itensCarrinho.push(prod);
+      salvarECarregarCarrinho();
+    }
+
+    function salvarECarregarCarrinho(){
+      localStorage.setItem("carrinho", JSON.stringify(itensCarrinho));
+      atualizarCarrinho();
+    }
+
+    function finalizarCompra() {
+      if (itensCarrinho.length === 0) {
+        alert("Seu carrinho está vazio!");
+        return;
+      }
+      const frete = 5.00; // valor fixo do frete
+      const total = itensCarrinho.reduce((acc, it) => acc + it.preco, 0);
+      const totalComFrete = total + frete;
+
+      localStorage.setItem('itensCarrinho', JSON.stringify(itensCarrinho));
+      localStorage.setItem('totalCarrinho', totalFinalComFrete);
+      localStorage.setItem('freteCarrinho', frete);
+
+      window.location.href = 'finalizarcompra.html';
+    
+    }
+    
+    // Renderizar produtos com DOM (mais seguro)
+    function renderizarProdutos(){
+      listaEl.innerHTML = "";
+      produtos.forEach((p, i) => {
+        const box = document.createElement("div");
+        box.className = "produto";
+
+        const img = document.createElement("img");
+        img.src = p.imagem || "";
+        img.alt = p.nome;
+        img.onerror = function(){ this.style.opacity = 0.7; this.src = ''; }; // se falhar, esvazia
+
+        const h3 = document.createElement("h3");
+        h3.textContent = p.nome;
+
+        const pPrice = document.createElement("p");
+        pPrice.textContent = "Preço: " + moneyBRL(p.preco);
+
+        const actions = document.createElement("div");
+        actions.className = "actions";
+
+        const btn = document.createElement("button");
+        btn.textContent = "Adicionar";
+        btn.addEventListener("click", ()=> adicionarAoCarrinho(p));
+
+        actions.appendChild(btn);
+
+        box.appendChild(img);
+        box.appendChild(h3);
+        box.appendChild(pPrice);
+        box.appendChild(actions);
+
+        listaEl.appendChild(box);
+      });
+    }
+
+    // link sair: limpa apenas sessão e redireciona
+    document.getElementById("link-sair").addEventListener("click", function(e){
+      // não chamar sair se for apenas link normal; queremos limpar sessão
+      e.preventDefault();
+      localStorage.removeItem("usuarioLogado");
+      // opcional: localStorage.removeItem("usuarioCadastrado");
+      window.location.href = "login.html";
+    });
+
+    // inicialização
+    renderizarProdutos();
+    atualizarCarrinho();
+  </script>
+</body>
+</html>

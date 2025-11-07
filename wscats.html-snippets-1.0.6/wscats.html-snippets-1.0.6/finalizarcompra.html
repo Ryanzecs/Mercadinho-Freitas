@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Finalizando Pedido</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f4f6fa;
+            margin: 0;
+            padding: 20px;
+        }
+        header {
+            background-color: #007710;
+            color: rgb(255, 255, 255);
+            text-align: center;
+            padding: 15px;
+            border-radius: 10px;
+        }
+        main {
+            background: #153353;
+            margin-top: 20px;
+            padding: 20px;
+            border-radius: 10px;
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <h1>Finalizando seu Pedido</h1>
+    <p>Obrigado por escolher o Mercadinho Freitas!</p>
+    <p>Estamos processando sua compra...</p>
+</header>
+
+<main>
+    <h2>Detalhes do Pedido</h2>
+    <p>Itens comprados:</p>
+    <ul id="lista-produtos"></ul>
+    <p><strong>Frete:</strong> <span id="frete"></span></p>
+    <p><strong>Total com Frete:</strong> <span id="total"></span></p>
+    <p>Seu pedido será entregue em breve. Agradecemos pela preferência!</p>
+</main>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    // Recupera itens e total do localStorage
+    const itens = JSON.parse(localStorage.getItem('itensCarrinho')) || [];
+    const total = parseFloat(localStorage.getItem('totalCarrinho')) || 0;
+    const frete = parseFloat(localStorage.getItem('freteCarrinho')) || 0;
+    const listaProdutos = document.getElementById('lista-produtos');
+    const totalTexto = document.getElementById('total');
+    const freteTexto = document.getElementById('frete');
+
+    // Adiciona os itens na lista
+    itens.forEach(item => {
+        const li = document.createElement('li');
+        li.textContent = `${item.nome} - R$ ${item.preco.toFixed(2)}`;
+        listaProdutos.appendChild(li);
+    });
+
+    totalTexto.textContent = `R$ ${parseFloat(total).toFixed(2)}`;
+    freteTexto.textContent = `R$ ${parseFloat(frete).toFixed(2)}`;
+});
+</script>
+
+</body>
+</html>
